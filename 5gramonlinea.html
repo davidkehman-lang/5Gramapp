@@ -3,77 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5Gram Ultimate Edition</title>
+    <title>5Gram Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root { --tg-blue: #2488ff; --bg: #0f0f0f; --card: #1c1c1e; --text: #ffffff; --border: #262626; --msg-bg: #2c2c2e; }
         body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
-        
         .header { height: 60px; background: var(--card); display: flex; align-items: center; padding: 0 15px; border-bottom: 1px solid var(--border); z-index: 100; }
         .screen { display: none; padding: 15px; height: calc(100vh - 90px); overflow-y: auto; }
         .active-screen { display: block; }
-        
-        .avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--tg-blue); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; flex-shrink: 0; }
-        .item { padding: 15px; display: flex; align-items: center; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
-        .item:active { background: #2c2c2e; }
-        
+        .avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--tg-blue); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
+        .item { padding: 15px; display: flex; align-items: center; border-bottom: 1px solid var(--border); cursor: pointer; }
         .btn { background: var(--tg-blue); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; margin: 5px 0; }
-        input { width: 100%; padding: 12px; margin: 8px 0; background: var(--msg-bg); border: none; border-radius: 10px; color: var(--text); box-sizing: border-box; outline: none; }
-
-        /* Окно чата */
+        input { width: 100%; padding: 12px; margin: 8px 0; background: var(--msg-bg); border: none; border-radius: 10px; color: var(--text); box-sizing: border-box; }
         #chat-window { position: fixed; inset: 0; background: var(--bg); z-index: 200; display: none; flex-direction: column; }
         #msg-box { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .msg-bubble { padding: 10px 14px; border-radius: 15px; max-width: 75%; font-size: 15px; }
-        .my-msg { align-self: flex-end; background: var(--tg-blue); color: white; }
-        .his-msg { align-self: flex-start; background: var(--msg-bg); }
-
-        /* Звонки */
+        .msg-bubble { padding: 10px 14px; border-radius: 15px; max-width: 75%; background: var(--msg-bg); align-self: flex-start; }
+        .my-msg { align-self: flex-end; background: var(--tg-blue); }
         .call-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        #remote-video { width: 100%; height: 70vh; object-fit: cover; border-radius: 20px; }
-        #local-video { width: 100px; height: 140px; position: absolute; bottom: 120px; right: 20px; border-radius: 10px; border: 2px solid var(--tg-blue); object-fit: cover; }
+        video { width: 100%; height: 60vh; border-radius: 20px; background: #000; object-fit: cover; }
     </style>
 </head>
 <body onload="init()">
 
     <div id="auth-screen" style="display:none; flex-direction:column; justify-content:center; align-items:center; height:100vh; padding:30px;">
-        <h1 style="color:var(--tg-blue); font-size: 42px; margin:0;">5Gram</h1>
-        <p style="opacity:0.5; margin-bottom:30px;">Messenger & Calls</p>
-        <input type="text" id="reg-n" placeholder="Ваше имя">
-        <input type="text" id="reg-u" placeholder="@username (без @)">
-        <button class="btn" onclick="register()">Начать</button>
+        <h1 style="color:var(--tg-blue)">5Gram</h1>
+        <input type="text" id="reg-n" placeholder="Имя">
+        <input type="text" id="reg-u" placeholder="Ник (без @)">
+        <button class="btn" onclick="register()">Войти</button>
     </div>
 
     <div id="main-app" style="display:none;">
         <div class="header">
-            <div style="flex-grow:1; font-weight:bold; font-size:18px;">5Gram</div>
-            <div class="avatar" id="top-av" onclick="showScreen('search')">🔍</div>
+            <div style="flex-grow:1; font-weight:bold">5Gram</div>
+            <div class="avatar" onclick="showScreen('search')">🔍</div>
         </div>
-        
-        <div id="screen-chats" class="screen active-screen">
-            <div id="chat-list"></div>
-            <p style="text-align:center; opacity:0.4; font-size:12px; margin-top:20px;">Нажмите 🔍 чтобы найти друга</p>
-        </div>
-
+        <div id="screen-chats" class="screen active-screen"><div id="chat-list"></div></div>
         <div id="screen-search" class="screen">
-            <h3>Найти собеседника</h3>
-            <input type="text" id="search-input" placeholder="Введите ник друга...">
-            <button class="btn" onclick="addUser()">Добавить и открыть чат</button>
-            <button class="btn" style="background:none" onclick="showScreen('chats')">Назад</button>
+            <input type="text" id="search-input" placeholder="Ник друга...">
+            <button class="btn" onclick="addUser()">Добавить</button>
+            <button class="btn" style="background:gray" onclick="showScreen('chats')">Назад</button>
         </div>
     </div>
 
     <div id="chat-window">
         <div class="header">
-            <div onclick="closeChat()" style="cursor:pointer; padding-right:15px; font-size:20px;">←</div>
-            <div id="h-n" style="flex-grow:1; font-weight:bold;">Чат</div>
-            <div style="display:flex; gap:20px; margin-right:10px;">
-                <span onclick="startCall(false)" style="cursor:pointer; font-size:22px;">📞</span>
-                <span onclick="startCall(true)" style="cursor:pointer; font-size:22px;">📹</span>
+            <div onclick="closeChat()" style="padding-right:20px">←</div>
+            <div id="h-n" style="flex-grow:1; font-weight:bold"></div>
+            <div style="display:flex; gap:20px">
+                <span onclick="makeCall(false)">📞</span>
+                <span onclick="makeCall(true)">📹</span>
             </div>
         </div>
         <div id="msg-box"></div>
-        <div style="padding:10px; display:flex; gap:10px; background:var(--card); border-top:1px solid var(--border)">
+        <div style="padding:10px; display:flex; gap:10px; background:var(--card)">
             <input type="text" id="m-i" style="margin:0" placeholder="Сообщение...">
             <button class="btn" style="width:60px; margin:0" onclick="sendMsg()">➜</button>
         </div>
@@ -81,163 +64,119 @@
 
     <div id="call-screen" class="call-modal">
         <video id="remote-video" autoplay playsinline></video>
-        <video id="local-video" autoplay muted playsinline></video>
-        <h2 id="call-status" style="margin-top:20px;">Вызов...</h2>
-        <div style="display:flex; gap:20px;">
-            <button class="btn" id="answer-btn" style="background:#4cd964; width:120px; display:none;" onclick="answerCall()">Ответить</button>
-            <button class="btn" style="background:#ff3b30; width:120px;" onclick="endCall()">Сбросить</button>
-        </div>
+        <h2 id="call-status">Звонок...</h2>
+        <button class="btn" id="ans-btn" style="background:#4cd964; width:150px; display:none;">Ответить</button>
+        <button class="btn" style="background:#ff3b30; width:150px; margin-top:10px;" onclick="endCall()">Завершить</button>
     </div>
 
     <script>
-        // Инициализация (используем твой Supabase)
         const _sb = supabase.createClient('https://kqcjrknckaqarlqxsgsb.supabase.co', 'sb_publishable_m4dYh5AxBbvA7N9aRadYIw_1oPLjHar');
-        
-        let db = { 
-            profile: null, 
-            chats: {"global": {n: "Глобальный чат", u: "@global"}} 
-        };
-        
-        let peer, myStream, activeCall, cur_chat_id, cur_recipient_u;
+        let db = { profile: null, chats: {} };
+        let peer, myStream, cur_call, cur_rec_u;
 
         async function init() {
-            const saved = localStorage.getItem('5Gram_v3_data');
-            if(saved) db = JSON.parse(saved);
-
+            const s = localStorage.getItem('5gram_vfinal');
+            if(s) db = JSON.parse(s);
             if(db.profile) {
                 document.getElementById('main-app').style.display = 'block';
                 renderChats();
-                initPeer();
-                subscribeToMsgs();
+                startPeer();
+                subscribe();
             } else {
                 document.getElementById('auth-screen').style.display = 'flex';
             }
         }
 
-        // --- ЗВОНКИ ---
-        function initPeer() {
-            const myID = db.profile.u.replace('@', '').toLowerCase();
-            peer = new Peer(myID);
-
+        function startPeer() {
+            const id = db.profile.u.replace('@','').toLowerCase().trim();
+            peer = new Peer(id);
+            
             peer.on('call', call => {
-                activeCall = call;
+                cur_call = call;
                 document.getElementById('call-screen').style.display = 'flex';
-                document.getElementById('call-status').innerText = "Входящий вызов...";
-                document.getElementById('answer-btn').style.display = 'block';
+                document.getElementById('call-status').innerText = "Вам звонят!";
+                const ab = document.getElementById('ans-btn');
+                ab.style.display = 'block';
+                ab.onclick = async () => {
+                    myStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
+                    call.answer(myStream);
+                    ab.style.display = 'none';
+                    handleStream(call);
+                };
             });
         }
 
-        async function startCall(withVideo) {
-            if(cur_recipient_u === '@global') return alert("В общий чат звонить нельзя!");
-            
-            const targetID = cur_recipient_u.replace('@', '').toLowerCase();
-            try {
-                myStream = await navigator.mediaDevices.getUserMedia({video: withVideo, audio: true});
-                document.getElementById('local-video').srcObject = myStream;
-                document.getElementById('call-screen').style.display = 'flex';
-                
-                activeCall = peer.call(targetID, myStream);
-                handleCall(activeCall);
-            } catch(e) { alert("Ошибка камеры/микрофона"); }
+        async function makeCall(v) {
+            const tid = cur_rec_u.replace('@','').toLowerCase().trim();
+            myStream = await navigator.mediaDevices.getUserMedia({video:v, audio:true});
+            document.getElementById('call-screen').style.display = 'flex';
+            cur_call = peer.call(tid, myStream);
+            handleStream(cur_call);
         }
 
-        async function answerCall() {
-            myStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-            document.getElementById('local-video').srcObject = myStream;
-            document.getElementById('answer-btn').style.display = 'none';
-            activeCall.answer(myStream);
-            handleCall(activeCall);
-        }
-
-        function handleCall(call) {
-            call.on('stream', stream => {
-                document.getElementById('remote-video').srcObject = stream;
+        function handleStream(call) {
+            call.on('stream', s => {
+                document.getElementById('remote-video').srcObject = s;
                 document.getElementById('call-status').innerText = "В разговоре";
             });
-            call.on('close', endCall);
         }
 
-        function endCall() {
-            if(activeCall) activeCall.close();
-            if(myStream) myStream.getTracks().forEach(t => t.stop());
-            document.getElementById('call-screen').style.display = 'none';
-            location.reload(); 
-        }
+        function endCall() { location.reload(); }
 
-        // --- ЧАТЫ ---
         function register() {
-            const n = document.getElementById('reg-n').value;
-            const u = document.getElementById('reg-u').value;
+            const n = document.getElementById('reg-n').value, u = document.getElementById('reg-u').value;
             if(n && u) {
-                db.profile = { n, u: '@' + u.replace('@','').trim() };
-                save(); location.reload();
+                db.profile = { n, u: '@'+u.toLowerCase().trim() };
+                localStorage.setItem('5gram_vfinal', JSON.stringify(db));
+                location.reload();
             }
         }
 
         function addUser() {
-            const u = document.getElementById('search-input').value.trim();
+            const u = document.getElementById('search-input').value.trim().toLowerCase();
             if(!u) return;
-            const formattedU = u.startsWith('@') ? u : '@'+u;
-            const id = 'chat_' + Date.now();
-            db.chats[id] = { n: formattedU, u: formattedU };
-            save(); renderChats(); showScreen('chats');
+            db.chats[u] = { n: '@'+u, u: '@'+u };
+            localStorage.setItem('5gram_vfinal', JSON.stringify(db));
+            renderChats(); showScreen('chats');
         }
 
         function renderChats() {
-            const list = document.getElementById('chat-list');
-            list.innerHTML = '';
+            const l = document.getElementById('chat-list'); l.innerHTML = '';
             Object.keys(db.chats).forEach(id => {
-                const c = db.chats[id];
-                list.innerHTML += `
-                    <div class="item" onclick="openChat('${id}')">
-                        <div class="avatar">${c.n[0].toUpperCase()}</div>
-                        <div style="margin-left:15px"><b>${c.n}</b></div>
-                    </div>`;
+                l.innerHTML += `<div class="item" onclick="openChat('${id}')"><div class="avatar">${id[0]}</div><b style="margin-left:10px">${db.chats[id].n}</b></div>`;
             });
         }
 
         function openChat(id) {
-            cur_chat_id = id;
-            cur_recipient_u = db.chats[id].u;
+            cur_rec_u = db.chats[id].u;
             document.getElementById('chat-window').style.display = 'flex';
             document.getElementById('h-n').innerText = db.chats[id].n;
-            loadMsgs();
+            load();
         }
 
         async function sendMsg() {
-            const input = document.getElementById('m-i');
-            if(!input.value) return;
-            const text = input.value;
-            input.value = '';
-
-            await _sb.from('messages').insert([{
-                text: text,
-                chat_id: cur_recipient_u === '@global' ? 'global' : [db.profile.u, cur_recipient_u].sort().join('_'),
-                sender_username: db.profile.u
-            }]);
+            const i = document.getElementById('m-i'); if(!i.value) return;
+            const cid = [db.profile.u, cur_rec_u].sort().join('_');
+            await _sb.from('messages').insert([{ text: i.value, sender_username: db.profile.u, chat_id: cid }]);
+            i.value = '';
         }
 
-        async function loadMsgs() {
-            const chatKey = cur_recipient_u === '@global' ? 'global' : [db.profile.u, cur_recipient_u].sort().join('_');
-            const { data } = await _sb.from('messages').select('*').eq('chat_id', chatKey).order('created_at', {ascending: true});
+        async function load() {
+            const cid = [db.profile.u, cur_rec_u].sort().join('_');
+            const {data} = await _sb.from('messages').select('*').eq('chat_id', cid);
             document.getElementById('msg-box').innerHTML = '';
-            if(data) data.forEach(drawMsg);
+            if(data) data.forEach(d => {
+                const b = document.createElement('div');
+                b.className = `msg-bubble ${d.sender_username === db.profile.u ? 'my-msg' : ''}`;
+                b.innerText = d.text;
+                document.getElementById('msg-box').appendChild(b);
+            });
         }
 
-        function drawMsg(m) {
-            const box = document.getElementById('msg-box');
-            const isMe = m.sender_username === db.profile.u;
-            const div = document.createElement('div');
-            div.className = `msg-bubble ${isMe ? 'my-msg' : 'his-msg'}`;
-            div.innerHTML = `<small style="display:block;font-size:10px;opacity:0.6">${m.sender_username}</small>${m.text}`;
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-        }
-
-        function subscribeToMsgs() {
-            _sb.channel('any').on('postgres_changes', {event:'INSERT', table:'messages'}, payload => {
-                const chatKey = cur_recipient_u === '@global' ? 'global' : [db.profile.u, cur_recipient_u].sort().join('_');
-                if(payload.new.chat_id === chatKey) drawMsg(payload.new);
+        function subscribe() {
+            _sb.channel('m').on('postgres_changes', {event:'INSERT', table:'messages'}, p => {
+                const cid = [db.profile.u, cur_rec_u].sort().join('_');
+                if(p.new.chat_id === cid) load();
             }).subscribe();
         }
 
@@ -245,9 +184,7 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
             document.getElementById('screen-'+id).classList.add('active-screen');
         }
-        function closeChat() { document.getElementById('chat-window').style.display = 'none'; }
-        function save() { localStorage.setItem('5Gram_v3_data', JSON.stringify(db)); }
-        function logout() { localStorage.clear(); location.reload(); }
+        function closeChat() { document.getElementById('chat-window').style.display='none'; }
     </script>
 </body>
 </html>
